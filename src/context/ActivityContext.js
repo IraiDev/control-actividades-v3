@@ -10,6 +10,7 @@ let arraySubProject = [], arrayUsersE = [], arrayUsersS = []
 
 function ActivityProvider({ children }) {
   const { states: UiState, functions: UiFunc } = useContext(UiContext)
+  const [isLogin, setIsLogin] = useState(false)
   const [userData, setUserData] = useState({})
   const [usersTimes, setUsersTimes] = useState([])
   const [userNotify, setUserNotify] = useState([])
@@ -28,7 +29,7 @@ function ActivityProvider({ children }) {
       } else {
         Alert({ icon: 'error', content: body.msg, title: 'Error inicio de sesion', timer: 3000, showCancelButton: false })
       }
-      UiFunc.setIsLoading(false)
+      // UiFunc.setIsLoading(false)
     } catch (error) {
       console.log("login error: ", error)
     }
@@ -383,6 +384,7 @@ function ActivityProvider({ children }) {
       } else {
         Alert({ icon: 'wern', title: 'Error', content: 'El ID de esta tarea ya existe en las actividades', timer: 5000, showCancelButton: false })
       }
+      console.log(body)
       return false
     }
   }
@@ -413,35 +415,10 @@ function ActivityProvider({ children }) {
   }
 
   const value = {
-    userData,
-    usersTimes,
-    userNotify,
-    activitiesRA,
-    arrayUsersE,
-    arrayUsersS,
-    arraySubProject,
-    arrayProject,
-    arrayPriority,
-    arrayState,
-    infoTimes,
-    activityDetails,
+    setIsLogin,
+    isLogin,
     login,
-    logout,
-    getTimes,
-    getNotify,
-    getActivities,
-    getActivityDetail,
-    updatePriority,
-    updateUserColors,
-    addNewNote,
-    updateNote,
-    deleteNote,
-    addTaskToRA,
-    getFilters,
-    getInfoTimes,
-    markNotifications,
-    playActivity,
-    addNoteUpdatePriority
+    addTaskToRA
   }
   return (
     <ActivityContext.Provider value={value}>

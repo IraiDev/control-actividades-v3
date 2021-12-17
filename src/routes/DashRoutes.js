@@ -1,10 +1,10 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import Planner from '../components/screen/Planner'
 import NavBar from '../components/ui/NavBar'
 
 const DashRoutes = () => {
    return (
-      <BrowserRouter>
+      <>
          <NavBar />
          <Routes>
             <Route path="/actividades" element={<h1>Home</h1>} />
@@ -13,7 +13,7 @@ const DashRoutes = () => {
             <Route path="/planner" element={<Planner />} />
             <Route path="/" element={<Planner />} />
          </Routes>
-      </BrowserRouter>
+      </>
    )
 }
 

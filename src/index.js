@@ -7,6 +7,9 @@ import './assets/css/style.css'
 import App from './App'
 import * as serviceWorkerRegistration from './serviceWorkerRegistration'
 import reportWebVitals from './reportWebVitals'
+import GraphProvider from './context/GraphContext'
+import ActivityProvider from './context/ActivityContext'
+import UiProvider from './context/UiContext'
 
 Providers.globalProvider = new Msal2Provider({
   clientId: 'b71117b7-2266-427c-b1c8-9e7f367cacc3',
@@ -34,9 +37,16 @@ LocalizationHelper.strings = {
 }
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <UiProvider>
+    <ActivityProvider>
+      <GraphProvider>
+        <React.StrictMode>
+          <App />
+        </React.StrictMode>
+      </GraphProvider>
+    </ActivityProvider>
+  </UiProvider>
+  ,
   document.getElementById('root')
 )
 serviceWorkerRegistration.unregister()

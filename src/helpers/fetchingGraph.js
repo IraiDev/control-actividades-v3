@@ -65,7 +65,8 @@ export const updateFetchTask = async (endPoint = '', data, header) => {
     let provider = Providers.globalProvider;
     if (provider) {
       let graphClient = provider.graph.client;
-      await graphClient.api(endPoint).header('IF-Match', header).update(data);
+      const resp = await graphClient.api(endPoint).header('IF-Match', header).update(data)
+      console.log('respuesta update graph', resp)
     }
   } catch (error) {
     console.log(error);

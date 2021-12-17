@@ -17,6 +17,7 @@ function GraphProvider({ children }) {
   const getUserData = async () => {
     await getFetch('/me/').then(resp => {
       setUserEmail(resp.mail)
+      console.log(resp)
     })
   }
 
