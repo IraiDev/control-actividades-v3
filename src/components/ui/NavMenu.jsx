@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Login } from '@microsoft/mgt-react'
 import Button from './Button'
 import LiNav from './LiNav'
-import { deleteFetch, getFetch, updateFetch } from '../../helpers/fetchingGraph'
+import { deleteFetch, getFetch, updateFetch, postFetch } from '../../helpers/fetchingGraph'
 import ButtonNav from './ButtonNav'
 import { Alert } from '../../helpers/alerts'
 import Modal from './Modal'
@@ -17,11 +17,24 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
 
    const { id, title } = listData
 
-   const handleDeleteList = ({ id, title }) => {
+   const getTodoList = () => {
+      getFetch('/me/todo/lists')
+         .then(resp => setList(resp.value))
+   }
 
+   const handleDeleteList = ({ id, title }) => {
       const action = async () => {
-         await deleteFetch(`todo/lists/${id}`)
-         setList(list.filter(item => item.id !== id))
+         const resp = await deleteFetch(`todo/lists/${id}`)
+         if (resp) setList(list.filter(item => item.id !== id))
+         else {
+            Alert({
+               icon: 'error',
+               title: 'Error',
+               content: 'No se pudo eliminar la lista, recargue la pagina e intente nuevamente',
+               showCancelButton: false,
+               timer: 5000
+            })
+         }
       }
 
       Alert({
@@ -34,30 +47,55 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
       })
    }
 
-   // TODO: faltaria cerrar el modal y mostrar loading
    const handleUpdateList = async () => {
-      await updateFetch(`todo/lists/${id}`, { displayName: title })
-      setList(list.map(item => {
-         if (item.id === id) {
-            item.displayName = title
-         }
-         return item
-      }))
-   }
-
-   const handleOpenModalUpdate = ({ id, title }) => {
-      setlistData({ id, title })
+      const resp = await updateFetch(`todo/lists/${id}`, { displayName: title })
+      if (resp) {
+         setList(list.map(item => {
+            if (item.id === id) {
+               item.displayName = title
+            }
+            return item
+         }))
+      }
+      else {
+         Alert({
+            icon: 'error',
+            title: 'Error',
+            content: 'No se pudo actualizar la lista, recargue la pagina e intente nuevamente',
+            showCancelButton: false,
+            timer: 5000
+         })
+      }
       toggleModalUpdate()
    }
 
-   useEffect(() => {
-      const getTodoList = async () => {
-         await getFetch('/me/todo/lists')
-            .then(resp => {
-               setList(resp.value)
-               console.log(resp.value)
-            })
+   const handleCreateList = async () => {
+      const resp = await postFetch('todo/lists', { displayName: title })
+      if (resp) getTodoList()
+      else {
+         Alert({
+            icon: 'error',
+            title: 'Error',
+            content: 'No se pudo crear la lista, recargue la pagina e intente nuevamente',
+            showCancelButton: false,
+            timer: 5000
+         })
       }
+      toggleModalUpdate()
+   }
+
+   const handleOpenModalUpdate = ({ id, title, isUpdate }) => {
+      if (isUpdate) {
+         setlistData({ id, title })
+         toggleModalUpdate()
+      }
+      else {
+         setlistData({ id: null, title: '' })
+         toggleModalUpdate()
+      }
+   }
+
+   useEffect(() => {
       getTodoList()
    }, [])
 
@@ -65,10 +103,10 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
       <>
          <nav className={
             `h-screen w-72 fixed top-0 right-0 bg-white shadow-lg border
-         animate__animated animate__faster z-30
-         ${isOpen === null && 'hidden'}
-         ${isOpen ? 'animate__slideInRight' : 'animate__slideOutRight'}
-         `}>
+            animate__animated animate__faster z-30
+            ${isOpen === null && 'hidden'}
+            ${isOpen ? 'animate__slideInRight' : 'animate__slideOutRight'}
+            `}>
             <header className='flex justify-between items-center p-5'>
                <h1 className='capitalize text-gray-500'>menu</h1>
                <Button
@@ -89,7 +127,7 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
                   className='rounded-lg hover:bg-gray-100'
                   type='icon'
                   icon='fas fa-plus'
-                  onClick={toggleMenu} />
+                  onClick={() => handleOpenModalUpdate({ isUpdate: false })} />
             </section>
             <section>
                {
@@ -120,8 +158,8 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
                               id={obj.id}
                               title={obj.displayName}
                               icon="fas fa-list-ul"
-                              onUpdate={handleOpenModalUpdate}
-                              onDelete={handleDeleteList}
+                              onUpdate={() => handleOpenModalUpdate({ id: obj.id, title: obj.displayName, isUpdate: true })}
+                              onDelete={() => handleDeleteList({ id: obj.id })}
                            //   active={obj.id === idTodoList && 'bg-gray-800'}
                            />
                         )
@@ -137,13 +175,17 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
             </span>
          </nav >
 
-         {/* modal update list */}
+         {/* modal update/create list */}
          <Modal showModal={showModalUpdate} onClose={toggleModalUpdate}
             className='max-w-md'
             padding='p-6'
          >
             <div className='grid gap-4'>
-               <h1 className='font-semibold text-lg'>Actualizar lista</h1>
+               <h1 className='font-semibold text-lg'>
+                  {
+                     listData.id === null ? 'Crear lista' : 'Actualizar lista'
+                  }
+               </h1>
                <Input
                   field='nombre lista'
                   name='title'
@@ -153,8 +195,8 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
                <footer className='grid place-self-end'>
                   <Button
                      className='border border-blue-500 hover:bg-blue-500 text-blue-500 hover:text-white rounded-full w-max'
-                     name='actualizar'
-                     onClick={handleUpdateList}
+                     name={listData.id === null ? 'Crear' : 'Actualizar'}
+                     onClick={() => listData.id === null ? handleCreateList() : handleUpdateList()}
                   />
                </footer>
             </div>

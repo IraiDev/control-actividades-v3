@@ -6,7 +6,7 @@ const ButtonNav = ({ id, title, icon, isAction = true, onDelete, onUpdate }) => 
    const navigate = useNavigate()
 
    const handleNavigate = () => {
-      navigate(`todo/${id}`)
+      navigate(`to-do/${id}?title=${title}&icon=${icon}`)
    }
 
    return (
@@ -28,13 +28,13 @@ const ButtonNav = ({ id, title, icon, isAction = true, onDelete, onUpdate }) => 
                   type='icon'
                   icon='fas fa-pen'
                   className='rounded-lg hover:bg-gray-200 hover:text-green-500'
-                  onClick={() => onUpdate({ id, title })}
+                  onClick={onUpdate}
                />
                <Button
                   type='icon'
                   icon='fas fa-trash-alt'
                   className='rounded-lg hover:bg-gray-200 hover:text-red-500'
-                  onClick={() => onDelete({ id, title })}
+                  onClick={onDelete}
                />
             </section>
          }

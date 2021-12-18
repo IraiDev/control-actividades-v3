@@ -14,73 +14,80 @@ export const getFetch = async (endPoint = '', select = '', expand = '') => {
       return resp
     }
   } catch (error) {
-    console.log(error);
+    console.log(error)
+    return false
   }
 }
 
 export const getDetailsFetch = async (endPoint = '') => {
   try {
-    let provider = Providers.globalProvider;
+    let provider = Providers.globalProvider
     if (provider) {
-      let graphClient = provider.graph.client;
+      let graphClient = provider.graph.client
       let resp = await graphClient
         .api(endPoint)
-        .get();
+        .get()
 
       return resp
     }
   } catch (error) {
-    console.log(error);
+    console.log(error)
+    return false
   }
 }
 
 export const postFetch = async (endPoint = '', data) => {
   try {
-    let provider = Providers.globalProvider;
+    let provider = Providers.globalProvider
     if (provider) {
-      let graph = provider.graph.client;
-      await graph.api(`/me/${endPoint}`).post(data);
+      let graph = provider.graph.client
+      await graph.api(`/me/${endPoint}`).post(data)
+      return true
     }
   } catch (error) {
-    console.log(error);
+    console.log(error)
+    return false
   }
 }
 
 export const updateFetch = async (endPoint = '', data) => {
   try {
-    let provider = Providers.globalProvider;
+    let provider = Providers.globalProvider
     if (provider) {
-      let graphClient = provider.graph.client;
-      await graphClient.api(`me/${endPoint}`).update(data);
+      let graphClient = provider.graph.client
+      await graphClient.api(`me/${endPoint}`).update(data)
       return true
     }
   } catch (error) {
-    console.log(error);
+    console.log(error)
     return false
   }
 }
 
 export const updateFetchTask = async (endPoint = '', data, header) => {
   try {
-    let provider = Providers.globalProvider;
+    let provider = Providers.globalProvider
     if (provider) {
-      let graphClient = provider.graph.client;
-      const resp = await graphClient.api(endPoint).header('IF-Match', header).update(data)
-      console.log('respuesta update graph', resp)
+      let graphClient = provider.graph.client
+      await graphClient.api(endPoint).header('IF-Match', header).update(data)
+      return true
     }
   } catch (error) {
-    console.log(error);
+    console.log(error)
+    return false
   }
 }
 
 export const deleteFetch = async (endPoint = '') => {
   try {
-    let provider = Providers.globalProvider;
+    let provider = Providers.globalProvider
     if (provider) {
-      let graphClient = provider.graph.client;
-      await graphClient.api(`me/${endPoint}`).delete();
+      let graphClient = provider.graph.client
+      await graphClient.api(`me/${endPoint}`).delete()
+      return true
     }
   } catch (error) {
-    console.log(error);
+    console.log(error)
+    return false
   }
 }
