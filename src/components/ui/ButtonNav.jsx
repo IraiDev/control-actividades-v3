@@ -6,7 +6,7 @@ const ButtonNav = ({ id, title, icon, isAction = true, onDelete, onUpdate }) => 
    const navigate = useNavigate()
 
    const handleNavigate = () => {
-      navigate(`to-do/${id}?title=${title}&icon=${icon}`)
+      navigate(`to-do/${id}?title_list=${title}&icon_list=${icon}`)
    }
 
    return (

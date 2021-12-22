@@ -1,6 +1,6 @@
 import React from 'react'
 
-function Input({
+const Input = ({
    type = 'text',
    id,
    name,
@@ -11,9 +11,11 @@ function Input({
    width = 'w-full',
    disabled = false,
    tooltip,
-   isNumber = false }) {
+   isNumber = false,
+   className
+}) => {
    return (
-      <div>
+      <div className={className}>
          <p className="px-4 py-1 capitalize text-xs">{field}</p>
          <input
             id={id}

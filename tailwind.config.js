@@ -8,6 +8,9 @@ module.exports = {
       },
       maxHeight: {
         'res': '85vh',
+      },
+      minWidth: {
+        'menu': '130px',
       }
     },
     backgroundColor: theme => ({
