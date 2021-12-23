@@ -1,26 +1,27 @@
-import React from 'react'
-import { useToggle } from '../../hooks/useToggle'
+import React, { useState } from 'react'
+import OnOutsiceClick from 'react-outclick'
 
 const Menu = ({ menuButton, children }) => {
-  const [showMenu, toggleMenu] = useToggle(null)
+  const [showMenu, toggleMenu] = useState(false)
   return (
-    <div>
-      <button
-        className='h-7 w-7 rounded-lg hover:bg-gray-500 hover:bg-opacity-10 transition duration-500'
-        onClick={toggleMenu}
-      >
-        {menuButton}
-      </button>
-      <section
-        className={`
+    <OnOutsiceClick onOutsideClick={() => toggleMenu(false)}>
+      <div>
+        <button
+          className='h-7 w-7 rounded-lg hover:bg-gray-500 hover:bg-opacity-10 transition duration-500'
+          onClick={() => toggleMenu(!showMenu)}
+        >
+          {menuButton}
+        </button>
+        <section
+          className={`
           fixed animate__animated animate__faster
-          ${showMenu === null && 'hidden'}
-          ${showMenu ? 'animate__fadeIn' : 'animate__fadeOut'}
+          ${showMenu ? 'animate__fadeIn' : 'hidden'}
           `}
-      >
-        {children}
-      </section>
-    </div>
+        >
+          {children}
+        </section>
+      </div>
+    </OnOutsiceClick >
   )
 }
 

@@ -1,9 +1,12 @@
 import React, { createContext, useState } from 'react'
+import Loading from '../components/ui/Loading'
 import { clearParams } from '../helpers/helpersFunc'
 
 export const UiContext = createContext()
 
 const UiProvider = ({ children }) => {
+
+  const [isLoading, setIsLoading] = useState(false)
 
   const [filters, setFilters] = useState('')
 
@@ -31,12 +34,15 @@ const UiProvider = ({ children }) => {
     return newValue
   }
 
-
-  const value = {
-  }
   return (
-    <UiContext.Provider value={value}>
-      {children}
+    <UiContext.Provider value={{
+      isLoading,
+      setIsLoading,
+    }}>
+      <>
+        {children}
+        <Loading show={isLoading} />
+      </>
     </UiContext.Provider>
   )
 }

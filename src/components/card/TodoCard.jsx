@@ -12,6 +12,7 @@ const TodoCard = (props) => {
 
    return (
       <div
+         onDoubleClick={() => props.editTodo(id, title, body.content, importance)}
          className={`p-4 rounded-md border shadow-md hover:shadow-2xl hover:border-gray-600 ${styles}`}
       >
          <header className='flex items-center justify-between mb-2'>
@@ -26,10 +27,12 @@ const TodoCard = (props) => {
                   <Button
                      className='block w-full hover:bg-gray-500 hover:bg-opacity-10'
                      name='editar'
+                     onClick={() => props.editTodo(id, title, body.content, importance)}
                   />
                   <Button
                      className='block w-full hover:bg-gray-500 hover:bg-opacity-10'
                      name='eliminar'
+                     onClick={() => props.deleteTodo(id)}
                   />
                </MenuContent>
             </Menu>

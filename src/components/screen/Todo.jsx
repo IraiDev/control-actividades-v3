@@ -1,34 +1,70 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useParams, useLocation } from 'react-router-dom'
 import TodoCard from '../card/TodoCard'
-import { getFetch, postFetch } from '../../helpers/fetchingGraph'
+import { deleteFetch, getFetch, postFetch, updateFetch } from '../../helpers/fetchingGraph'
 import queryString from 'query-string'
 import Button from '../ui/Button'
 import Modal from '../ui/Modal'
 import Input from '../ui/Input'
 import TextArea from '../ui/TextArea'
 import { useToggle } from '../../hooks/useToggle'
-import { useForm } from '../../hooks/useForm'
 import { Alert } from '../../helpers/alerts'
+import { UiContext } from '../../context/UiContext'
+
+const initForm = {
+   title: '',
+   desc: '',
+   todo_id: null,
+}
 
 const Todo = () => {
    const { id } = useParams()
    const { search } = useLocation()
    const { title_list = '', icon_list = '' } = queryString.parse(search)
+   const { setIsLoading } = useContext(UiContext)
    const [tasks, setTasks] = useState([])
    const [important, setImportant] = useState({ select: false, value: '' })
    const [newImportant, setNewImportant] = useState({ select: false, value: 'normal' })
-   const [showModalNewTodo, toggleModalNewTodo] = useToggle(false)
-   const [{ title, desc }, onChangeValues, reset] = useForm({ title: '', desc: '' })
+   const [showModalTodo, toggleModalTodo] = useToggle(false)
+   const [values, setValues] = useState(initForm)
+
+   // destructuring
+   const { title, desc, todo_id } = values
+   // destructuring
 
    const taskFetch = () => {
       getFetch(`/me/todo/lists/${id}/tasks`)
-         .then(resp => setTasks(resp.value))
-         .catch(console.log)
+         .then(resp => {
+            setTasks(resp.value)
+            setIsLoading(false)
+         })
+         .catch(err => {
+            console.log(err)
+            setIsLoading(false)
+         })
    }
 
-   const onCreateTodo = async (e) => {
-      e.preventDefault()
+   const closeModalTodo = () => {
+      setNewImportant({ select: false, value: 'normal' })
+      toggleModalTodo()
+      setValues(initForm)
+   }
+
+   const openModalUpdateTodo = (idTodo, title, content, importance) => {
+      setValues({
+         todo_id: idTodo,
+         title,
+         desc: content
+      })
+      setNewImportant({
+         select: importance === 'high',
+         value: importance
+      })
+      toggleModalTodo()
+   }
+
+   const handleNewTodo = async () => {
+      setIsLoading(true)
       const data = {
          title,
          importance: newImportant.value,
@@ -43,17 +79,52 @@ const Todo = () => {
             content: 'error al crear la to-do',
             showCancelButton: false,
          })
+         setIsLoading(false)
       }
-      closeModalNewTodo()
+      closeModalTodo()
    }
 
-   const closeModalNewTodo = () => {
-      setNewImportant({ select: false, value: '' })
-      toggleModalNewTodo()
-      reset()
+   const handleUpdateTodo = async () => {
+      setIsLoading(true)
+      const data = {
+         title,
+         importance: newImportant.value,
+         body: { content: desc }
+      }
+      const endPoint = `todo/lists/${id}/tasks/${todo_id}`
+      const ok = await updateFetch(endPoint, data)
+      if (ok) { taskFetch() }
+      else {
+         Alert({
+            title: 'Error',
+            icon: 'error',
+            content: 'error al actualizar la to-do',
+            showCancelButton: false,
+         })
+         setIsLoading(false)
+      }
+      closeModalTodo()
+   }
+
+   const handleDeleteTodo = async (idTodo) => {
+      setIsLoading(true)
+      const endPoint = `todo/lists/${id}/tasks/${idTodo}`
+      const ok = await deleteFetch(endPoint)
+      if (ok) { taskFetch() }
+      else {
+         Alert({
+            title: 'Error',
+            icon: 'error',
+            content: 'error al eliminar la to-do',
+            showCancelButton: false,
+         })
+         setIsLoading(false)
+      }
    }
 
    useEffect(() => {
+      setIsLoading(true)
+      setTasks([])
       taskFetch()
       // eslint-disable-next-line
    }, [id])
@@ -87,7 +158,7 @@ const Todo = () => {
             <Button
                className='bg-blue-400 hover:bg-blue-500 text-white rounded-full'
                name='nuevo to-do'
-               onClick={toggleModalNewTodo}
+               onClick={toggleModalTodo}
             />
          </header>
          <section
@@ -104,6 +175,8 @@ const Todo = () => {
                         return (
                            <TodoCard
                               key={task.id}
+                              editTodo={openModalUpdateTodo}
+                              deleteTodo={handleDeleteTodo}
                               {...task} />
                         )
                      }
@@ -115,18 +188,21 @@ const Todo = () => {
          </section>
 
          {/* modal new to-do */}
-         <Modal showModal={showModalNewTodo} onClose={closeModalNewTodo} isBlur={false}
+         <Modal showModal={showModalTodo} onClose={closeModalTodo} isBlur={false}
             className='max-w-2xl' padding='p-7'
          >
-            <form onSubmit={onCreateTodo} className='grid gap-6'>
-               <h1 className='text-lg font-semibold'>Crear to-do</h1>
+            <div className='grid gap-6'>
+               <h1 className='text-lg font-semibold'>
+                  {todo_id ? 'Actualizar to-do' : 'Nuevo to-do'}
+               </h1>
                <section className='flex items-center justify-between gap-4'>
                   <Input
                      className='w-full'
                      field='titulo'
-                     name='title'
                      value={title}
-                     onChange={onChangeValues}
+                     onChange={e => {
+                        setValues({ ...values, title: e.target.value })
+                     }}
                   />
                   <label htmlFor='newImprotant' className='pt-6'>
                      <input
@@ -147,18 +223,20 @@ const Todo = () => {
                </section>
                <TextArea
                   field='descripcion'
-                  name='desc'
                   value={desc}
-                  onChange={onChangeValues}
+                  onChange={e => {
+                     setValues({ ...values, desc: e.target.value })
+                  }}
                />
                <footer className='grid place-self-end'>
                   <Button
                      className='border border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white rounded-full w-max'
                      type='submit'
-                     name='crear to-do'
+                     name={todo_id ? 'actualizar to-do' : 'crear to-do'}
+                     onClick={todo_id ? handleUpdateTodo : handleNewTodo}
                   />
                </footer>
-            </form>
+            </div>
          </Modal>
 
       </>
