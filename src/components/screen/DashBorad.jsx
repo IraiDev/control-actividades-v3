@@ -3,7 +3,7 @@ import DashRoutes from '../../routes/DashRoutes'
 
 const DashBorad = () => {
    return (
-      <div className='h-screen w-full bg-gray-100'>
+      <div className='h-full w-full bg-gray-100 relative'>
          <DashRoutes />
       </div>
    )

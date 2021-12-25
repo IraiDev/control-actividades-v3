@@ -13,6 +13,7 @@ const Menu = ({ menuButton, children }) => {
           {menuButton}
         </button>
         <section
+          onClick={() => toggleMenu(false)}
           className={`
           fixed animate__animated animate__faster
           ${showMenu ? 'animate__fadeIn' : 'hidden'}

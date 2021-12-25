@@ -27,12 +27,12 @@ const TodoCard = (props) => {
                   <Button
                      className='block w-full hover:bg-gray-500 hover:bg-opacity-10'
                      name='editar'
-                     onClick={() => props.editTodo(id, title, body.content, importance)}
+                     onClick={props.editTodo}
                   />
                   <Button
                      className='block w-full hover:bg-gray-500 hover:bg-opacity-10'
                      name='eliminar'
-                     onClick={() => props.deleteTodo(id)}
+                     onClick={props.deleteTodo}
                   />
                </MenuContent>
             </Menu>

@@ -50,7 +50,7 @@ const Todo = () => {
       setValues(initForm)
    }
 
-   const openModalUpdateTodo = (idTodo, title, content, importance) => {
+   const openModalUpdateTodo = ({ idTodo, title, content, importance }) => {
       setValues({
          todo_id: idTodo,
          title,
@@ -106,20 +106,31 @@ const Todo = () => {
       closeModalTodo()
    }
 
-   const handleDeleteTodo = async (idTodo) => {
-      setIsLoading(true)
-      const endPoint = `todo/lists/${id}/tasks/${idTodo}`
-      const ok = await deleteFetch(endPoint)
-      if (ok) { taskFetch() }
-      else {
-         Alert({
-            title: 'Error',
-            icon: 'error',
-            content: 'error al eliminar la to-do',
-            showCancelButton: false,
-         })
-         setIsLoading(false)
+   const handleDeleteTodo = ({ idTodo, title }) => {
+      const action = async () => {
+         setIsLoading(true)
+         const endPoint = `todo/lists/${id}/tasks/${idTodo}`
+         const ok = await deleteFetch(endPoint)
+         if (ok) { taskFetch() }
+         else {
+            Alert({
+               title: 'Error',
+               icon: 'error',
+               content: 'error al eliminar la to-do',
+               showCancelButton: false,
+            })
+            setIsLoading(false)
+         }
       }
+
+      Alert({
+         title: 'Eliminar to-do',
+         icon: 'warning',
+         content: `¿Estás seguro de eliminar el siguiente to-do: <strong>${title}?</strong>`,
+         cancelButton: 'No, cancelar',
+         confirmButton: 'Si, eliminar',
+         action
+      })
    }
 
    useEffect(() => {
@@ -175,8 +186,8 @@ const Todo = () => {
                         return (
                            <TodoCard
                               key={task.id}
-                              editTodo={openModalUpdateTodo}
-                              deleteTodo={handleDeleteTodo}
+                              editTodo={() => openModalUpdateTodo({ idTodo: task.id, title: task.title, content: task.body.content, importance: task.importance })}
+                              deleteTodo={() => handleDeleteTodo({ idTodo: task.id, title: task.title })}
                               {...task} />
                         )
                      }
@@ -187,7 +198,7 @@ const Todo = () => {
             }
          </section>
 
-         {/* modal new to-do */}
+         {/* modal new/update to-do */}
          <Modal showModal={showModalTodo} onClose={closeModalTodo} isBlur={false}
             className='max-w-2xl' padding='p-7'
          >

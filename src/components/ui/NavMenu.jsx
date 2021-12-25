@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import { Login } from '@microsoft/mgt-react'
 import Button from './Button'
 import LiNav from './LiNav'
@@ -8,24 +9,41 @@ import { Alert } from '../../helpers/alerts'
 import Modal from './Modal'
 import { useToggle } from '../../hooks/useToggle'
 import Input from './Input'
+import { UiContext } from '../../context/UiContext'
+
+const initForm = { id: null, title: '', idRef: null }
 
 const NavMenu = ({ isOpen, toggleMenu }) => {
 
+   const { setIsLoading } = useContext(UiContext)
    const [list, setList] = useState([])
-   const [listData, setlistData] = useState({ id: null, title: '' })
-   const [showModalUpdate, toggleModalUpdate] = useToggle(false)
+   const [values, setValues] = useState(initForm)
+   const [showModalList, toggleModalList] = useToggle(false)
 
-   const { id, title } = listData
+   // destructuring
+   const { id, title, idRef } = values
+   // destructuring
 
    const getTodoList = () => {
       getFetch('/me/todo/lists')
-         .then(resp => setList(resp.value))
+         .then(resp => {
+            setList(resp.value)
+            setIsLoading(false)
+         })
+         .catch(err => {
+            console.log(err)
+            setIsLoading(false)
+         })
    }
 
    const handleDeleteList = ({ id, title }) => {
       const action = async () => {
-         const resp = await deleteFetch(`todo/lists/${id}`)
-         if (resp) setList(list.filter(item => item.id !== id))
+         setIsLoading(true)
+         const ok = await deleteFetch(`todo/lists/${id}`)
+         if (ok) {
+            setList(list.filter(item => item.id !== id))
+            setIsLoading(false)
+         }
          else {
             Alert({
                icon: 'error',
@@ -34,6 +52,7 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
                showCancelButton: false,
                timer: 5000
             })
+            setIsLoading(false)
          }
       }
 
@@ -48,6 +67,7 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
    }
 
    const handleUpdateList = async () => {
+      setIsLoading(true)
       const resp = await updateFetch(`todo/lists/${id}`, { displayName: title })
       if (resp) {
          setList(list.map(item => {
@@ -56,6 +76,7 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
             }
             return item
          }))
+         setIsLoading(false)
       }
       else {
          Alert({
@@ -65,13 +86,15 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
             showCancelButton: false,
             timer: 5000
          })
+         setIsLoading(false)
       }
-      toggleModalUpdate()
+      closeModalList()
    }
 
    const handleCreateList = async () => {
+      setIsLoading(true)
       const resp = await postFetch('todo/lists', { displayName: title })
-      if (resp) getTodoList()
+      if (resp) { getTodoList() }
       else {
          Alert({
             icon: 'error',
@@ -80,23 +103,24 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
             showCancelButton: false,
             timer: 5000
          })
+         setIsLoading(false)
       }
-      toggleModalUpdate()
+      closeModalList()
    }
 
-   const handleOpenModalUpdate = ({ id, title, isUpdate }) => {
-      if (isUpdate) {
-         setlistData({ id, title })
-         toggleModalUpdate()
-      }
-      else {
-         setlistData({ id: null, title: '' })
-         toggleModalUpdate()
-      }
+   const OpenModalUpdate = ({ id, title }) => {
+      setValues({ id, title })
+      toggleModalList()
+   }
+
+   const closeModalList = () => {
+      setValues(initForm)
+      toggleModalList()
    }
 
    useEffect(() => {
       getTodoList()
+      // eslint-disable-next-line
    }, [])
 
    return (
@@ -115,19 +139,19 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
                   icon='fas fa-times'
                   onClick={toggleMenu} />
             </header>
-            <ul className='mb-10'>
+            <ul className=''>
                <LiNav to='/informe-tiempos' name='informe de tiempos' />
                <LiNav to='/actividades' name='actividades' />
                <LiNav to='/planner' name='planner' />
             </ul>
-            <div className='mx-5 border-t border-gray-300' />
-            <section className='p-5 flex items-center justify-between'>
+            <div className='mx-5 border-t border-gray-300 my-5' />
+            <section className='px-5 flex items-center justify-between'>
                <h1 className='capitalize text-gray-500'>To-dos</h1>
                <Button
                   className='rounded-lg hover:bg-gray-100'
                   type='icon'
                   icon='fas fa-plus'
-                  onClick={() => handleOpenModalUpdate({ isUpdate: false })} />
+                  onClick={toggleModalList} />
             </section>
             <section>
                {
@@ -140,7 +164,8 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
                               title={obj.displayName}
                               icon={`fas ${!obj.isOwner ? 'fa-user-friends' : 'fa-home'}`}
                               isAction={false}
-                           //   active={obj.id === idTodoList && 'bg-gray-800'}
+                              onClick={id => setValues({ ...values, idRef: id })}
+                              active={obj.id === idRef && 'text-purple-500'}
                            />
                         )
                      } else {
@@ -148,7 +173,7 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
                      }
                   })
                }
-               <hr className="my-3" />
+               <div className='mx-5 border-t border-gray-300 my-5' />
                {
                   list.map(obj => {
                      if (obj.wellknownListName !== "defaultList" && obj.isOwner) {
@@ -158,9 +183,10 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
                               id={obj.id}
                               title={obj.displayName}
                               icon="fas fa-list-ul"
-                              onUpdate={() => handleOpenModalUpdate({ id: obj.id, title: obj.displayName, isUpdate: true })}
-                              onDelete={() => handleDeleteList({ id: obj.id })}
-                           //   active={obj.id === idTodoList && 'bg-gray-800'}
+                              onUpdate={() => OpenModalUpdate({ id: obj.id, title: obj.displayName })}
+                              onDelete={() => handleDeleteList({ id: obj.id, title: obj.displayName })}
+                              onClick={id => setValues({ ...values, idRef: id })}
+                              active={obj.id === idRef && 'text-purple-500'}
                            />
                         )
                      } else {
@@ -176,27 +202,26 @@ const NavMenu = ({ isOpen, toggleMenu }) => {
          </nav >
 
          {/* modal update/create list */}
-         <Modal showModal={showModalUpdate} onClose={toggleModalUpdate}
+         <Modal showModal={showModalList} onClose={closeModalList}
             className='max-w-md'
             padding='p-6'
          >
             <div className='grid gap-4'>
                <h1 className='font-semibold text-lg'>
                   {
-                     listData.id === null ? 'Crear lista' : 'Actualizar lista'
+                     id === null ? 'Crear lista' : 'Actualizar lista'
                   }
                </h1>
                <Input
                   field='nombre lista'
-                  name='title'
                   value={title}
-                  onChange={e => setlistData({ ...listData, title: e.target.value })}
+                  onChange={e => { setValues({ ...values, title: e.target.value }) }}
                />
                <footer className='grid place-self-end'>
                   <Button
                      className='border border-blue-500 hover:bg-blue-500 text-blue-500 hover:text-white rounded-full w-max'
-                     name={listData.id === null ? 'Crear' : 'Actualizar'}
-                     onClick={() => listData.id === null ? handleCreateList() : handleUpdateList()}
+                     name={id === null ? 'Crear lista' : 'Actualizar lista'}
+                     onClick={() => id === null ? handleCreateList() : handleUpdateList()}
                   />
                </footer>
             </div>

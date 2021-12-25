@@ -1,11 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { ActivityContext } from '../../context/ActivityContext'
+import { UiContext } from '../../context/UiContext'
 import { Alert } from '../../helpers/alerts'
 import { getFetch, updateFetchTask } from '../../helpers/fetchingGraph'
 import PlannerCard from '../card/PlannerCard'
 
 const Planner = () => {
    const { addTaskToRA } = useContext(ActivityContext)
+   const { setIsLoading } = useContext(UiContext)
    const [penddig, setPenddig] = useState(true)
    const [atWork, setAtwork] = useState(false)
    const [complete, setComplete] = useState(false)
@@ -17,7 +19,6 @@ const Planner = () => {
       const action = async () => {
 
          const data = { title, description, id_todo: idTask, proyect: plan }
-
          const resp = await addTaskToRA(data)
 
          if (!resp) return
@@ -46,13 +47,20 @@ const Planner = () => {
    }
 
    useEffect(() => {
+      setIsLoading(true)
       const getPlannerTask = () => {
          getFetch('/me/planner/tasks', '', 'details')
             .then(resp => {
                setTasks(resp.value)
+               setIsLoading(false)
+            })
+            .catch(err => {
+               console.log(err)
+               setIsLoading(false)
             })
       }
       getPlannerTask()
+      // eslint-disable-next-line
    }, [])
 
    useEffect(() => {
@@ -63,7 +71,7 @@ const Planner = () => {
       penddig && setPercentComplete(0)
       atWork && setPercentComplete(50)
       complete && setPercentComplete(100)
-
+      return null
    }, [penddig, atWork, complete])
 
    return (
@@ -78,9 +86,13 @@ const Planner = () => {
                   type="checkbox"
                   checked={penddig}
                   onChange={() => {
+                     setIsLoading(true)
                      setPenddig(!penddig)
                      setAtwork(false)
                      setComplete(false)
+                     setTimeout(() => {
+                        setIsLoading(false)
+                     }, [1000])
                   }} />
                Pendientes
             </label>
@@ -93,9 +105,13 @@ const Planner = () => {
                   type="checkbox"
                   checked={atWork}
                   onChange={() => {
+                     setIsLoading(true)
                      setAtwork(!atWork)
                      setPenddig(false)
                      setComplete(false)
+                     setTimeout(() => {
+                        setIsLoading(false)
+                     }, [1000])
                   }} />
                en trabajo
             </label>
@@ -108,9 +124,13 @@ const Planner = () => {
                   type="checkbox"
                   checked={complete}
                   onChange={() => {
+                     setIsLoading(true)
                      setComplete(!complete)
                      setPenddig(false)
                      setAtwork(false)
+                     setTimeout(() => {
+                        setIsLoading(false)
+                     }, [1000])
                   }} />
                completadas
             </label>

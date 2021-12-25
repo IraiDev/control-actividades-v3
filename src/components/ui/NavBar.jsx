@@ -11,7 +11,7 @@ const NavBar = () => {
 
    return (
       <>
-         <nav className='flex items-center justify-between bg-white shadow-md border h-16 px-10'>
+         <nav className='flex items-center justify-between bg-white shadow-md border h-16 px-10 sticky top-0'>
             <Button
                className='bg-white hover:bg-gray-100 rounded-full shadow-lg'
                type='iconText'
