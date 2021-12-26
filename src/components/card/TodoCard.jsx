@@ -5,19 +5,24 @@ import Button from '../ui/Button';
 
 const TodoCard = (props) => {
 
-   const { id, title, body, importance } = props
+   const { title, body, importance } = props
    const styles = importance === 'high' ?
-      'bg-gray-700 hover:bg-gray-800 text-white transition duration-300'
-      : 'bg-white transition duration-300'
+      'bg-gray-700 text-white transition duration-200'
+      : 'bg-white transition duration-200 border hover:border-gray-400'
 
    return (
       <div
-         onDoubleClick={() => props.editTodo(id, title, body.content, importance)}
-         className={`p-4 rounded-md border shadow-md hover:shadow-2xl hover:border-gray-600 ${styles}`}
-      >
+         onDoubleClick={props.editTodo}
+         className={`
+            p-4 rounded-md shadow-md
+            hover:shadow-xl hover:scale-95 transform
+            ${styles}
+         `}>
          <header className='flex items-center justify-between mb-2'>
             <h1 className='font-semibold capitalize flex items-center gap-3'>
-               {importance === 'high' && <i className='fas fa-star text-yellow-500'></i>}
+               {importance === 'high' &&
+                  <i className='fas fa-star text-yellow-500'></i>
+               }
                {title}
             </h1>
             <Menu
@@ -37,8 +42,11 @@ const TodoCard = (props) => {
                </MenuContent>
             </Menu>
          </header>
-         <section>
-            <p className='whitespace-pre-wrap p-1 text-sm max-h-60 overflow-custom'>
+         <section className='max-h-60 overflow-custom'>
+            <p className={`
+               whitespace-pre-wrap p-1.5 text-sm bg-black rounded-md
+               ${importance === 'high' ? 'bg-opacity-10' : 'bg-opacity-5'}
+            `}>
                {body.content}
             </p>
          </section>

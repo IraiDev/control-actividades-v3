@@ -8,7 +8,7 @@ export const useActivity = () => {
 
   const fetchActivities = async () => {
     try {
-      const resp = await fetchToken(`task/get-task-ra?`, {}, 'POST')
+      const resp = await fetchToken(`task/get-task-ra?id_actividad`, {}, 'POST')
       const body = await resp.json()
       const { ok, tareas } = body
 

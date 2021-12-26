@@ -173,7 +173,7 @@ const Todo = () => {
             />
          </header>
          <section
-            className='grid gap-4 px-10 pb-5 max-h-res overflow-custom 
+            className='grid gap-4 px-10 pb-5 2xl:mx-36
             grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
          >
             {
@@ -186,7 +186,12 @@ const Todo = () => {
                         return (
                            <TodoCard
                               key={task.id}
-                              editTodo={() => openModalUpdateTodo({ idTodo: task.id, title: task.title, content: task.body.content, importance: task.importance })}
+                              editTodo={() => openModalUpdateTodo({
+                                 idTodo: task.id,
+                                 title: task.title,
+                                 content: task.body.content,
+                                 importance: task.importance
+                              })}
                               deleteTodo={() => handleDeleteTodo({ idTodo: task.id, title: task.title })}
                               {...task} />
                         )
@@ -200,7 +205,7 @@ const Todo = () => {
 
          {/* modal new/update to-do */}
          <Modal showModal={showModalTodo} onClose={closeModalTodo} isBlur={false}
-            className='max-w-2xl' padding='p-7'
+            className='max-w-2xl text-sm' padding='p-7'
          >
             <div className='grid gap-6'>
                <h1 className='text-lg font-semibold'>
@@ -226,10 +231,10 @@ const Todo = () => {
                               : setNewImportant({ select: e.target.checked, value: 'normal' })
                         }} />
                      <i className={`
-                     transition duration-500 cursor-pointer fa-lg hover:text-yellow-400
-                      ${newImportant.select ? 'fas fa-star text-yellow-500' : 'far fa-star'}
-                  `}
-                     ></i>
+                        transition duration-500 cursor-pointer fa-lg hover:text-yellow-400
+                        ${newImportant.select ? 'fas fa-star text-yellow-500' : 'far fa-star'}
+                     `}>
+                     </i>
                   </label>
                </section>
                <TextArea
@@ -241,7 +246,9 @@ const Todo = () => {
                />
                <footer className='grid place-self-end'>
                   <Button
-                     className='border border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white rounded-full w-max'
+                     className='
+                     border border-blue-400 text-blue-400 hover:bg-blue-400
+                     hover:text-white rounded-full w-max text-base'
                      type='submit'
                      name={todo_id ? 'actualizar to-do' : 'crear to-do'}
                      onClick={todo_id ? handleUpdateTodo : handleNewTodo}

@@ -11,6 +11,7 @@ let arraySubProject = [], arrayUsersE = [], arrayUsersS = []
 function ActivityProvider({ children }) {
   const { states: UiState, functions: UiFunc } = useContext(UiContext)
   const [isLogin, setIsLogin] = useState(false)
+  const [user, setUser] = useState({ ok: false })
   const [userData, setUserData] = useState({})
   const [usersTimes, setUsersTimes] = useState([])
   const [userNotify, setUserNotify] = useState([])
@@ -26,6 +27,7 @@ function ActivityProvider({ children }) {
       if (body.ok) {
         localStorage.setItem('tokenBackend', body.token)
         setUserData(body)
+        setUser(body.usuario)
       } else {
         Alert({ icon: 'error', content: body.msg, title: 'Error inicio de sesion', timer: 3000, showCancelButton: false })
       }
@@ -418,6 +420,7 @@ function ActivityProvider({ children }) {
     setIsLogin,
     isLogin,
     login,
+    user,
     addTaskToRA
   }
   return (

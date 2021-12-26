@@ -7,7 +7,10 @@ const Activity = () => {
 
   return (
     <>
-      <section className='pt-10 pb-24 container mx-auto gap-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+      <section className='
+        pt-10 pb-24 container mx-auto gap-3 grid 
+        grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4
+      '>
         {
           activities.length > 0 &&
           activities.map((act, i) => (
